@@ -4,8 +4,8 @@
 typedef struct
 {
 	int id;
-	clock_t time_arrive;
-	clock_t time_exit_queue;
+	time_t time_arrive;
+	time_t time_exit_queue;
 }element;
 
 int push(element *list_elements);

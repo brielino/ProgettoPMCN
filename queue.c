@@ -6,8 +6,8 @@
 typedef struct
 {
 	int id;
-	clock_t time_arrive;
-	clock_t time_exit_queue;
+	time_t time_arrive;
+	time_t time_exit_queue;
 }element;
 
 
@@ -15,7 +15,7 @@ int k=1;
 
 int push(element *list_elements){
 	element p;
-	p.time_arrive=clock();
+	p.time_arrive=time(NULL);
 	p.id=k;
 	k++;
 	for(int i=0;i<50;i++){
@@ -36,7 +36,7 @@ element pull(element *list_elements){
 		return p;
 	}
 	element current_element=list_elements[0];
-	current_element.time_exit_queue = clock();
+	current_element.time_exit_queue = time(NULL);
 	for(int i=1;i<50;i++){
 		if(list_elements[i-1].id!=0){
 			list_elements[i-1]=list_elements[i];
