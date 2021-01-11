@@ -13,7 +13,16 @@
 #include<sys/time.h>
 #include<signal.h>
 
+typedef struct
+{
+	pthread_t id;
+	int attive;
+	//attive indica se il thread è attivo o no (1/si 0/no)
+
+}dinamic_threads;
+
 void *print_message_function( void *ptr );
+void *print_message_function2();
 float calculate_dif_time(struct timeval time1,struct timeval time2);
 void *inserisci( void *ptr );
 pthread_mutex_t lock;
@@ -27,8 +36,8 @@ time_t START;
 float Tot_queue = 0.0;
 float Tot_service = 0.0;
 
-
-
+dinamic_threads list_threads[3];
+pthread_t thread4, thread5, thread6;
 void signal_handler()
 {
 	print_results();
@@ -49,22 +58,49 @@ void print_results()
 	exit(1);
 
 }
+
+
+void *dinamic_create(){
+	while(1){
+		if(element_in_queue(list_elements)>25){
+			for(int i=0;i<3;i++){
+				if(list_threads[i].attive == 0){
+					pthread_create( &(list_threads[i].id), NULL, print_message_function2,NULL);
+					break;
+				}
+			}
+			sleep(10);
+		}
+	}
+}
+
+void start_t(){
+	list_threads[0].id= thread4;
+	list_threads[0].attive= 0;
+	list_threads[1].id= thread5;
+	list_threads[1].attive= 0;
+	list_threads[2].id= thread6;
+	list_threads[2].attive= 0;
+}
+
 int main()
 {
 	pthread_t thread1, thread2, thread3;
+	
 
 	char *message1 = "Thread 1";
 	char *message2 = "Thread 2";
 	char *message3 = "Thread 3";
-	int  iret1, iret2, iret3;
 
 	initializate(list_elements);
+
 	signal(SIGINT,signal_handler);	
 	/* Create independent threads each of which will execute function */
 
-	iret1 = pthread_create( &thread1, NULL, print_message_function, (void*) message1);
-	iret2 = pthread_create( &thread2, NULL, print_message_function, (void*) message2);
-	iret3 = pthread_create( &thread3, NULL, inserisci, (void*) message3);
+	pthread_create( &thread1, NULL, print_message_function, (void*) message1);
+	pthread_create( &thread2, NULL, inserisci, (void*) message2);
+	pthread_create( &thread3, NULL, dinamic_create, (void*) message3);
+	start_t();
 
 	/* Wait till threads are complete before main continues. Unless we  */
 	/* wait we run the risk of executing an exit which will terminate   */
@@ -119,7 +155,8 @@ void *print_message_function(void *ptr)
 	double service_time;
 	
 	while((double) difftime(time(NULL),START) < 20.0  || isEmpty(list_elements)==0)
-	{
+	{	
+
 		pthread_mutex_lock(&lock);
 		element current_element = pull(list_elements);
 		if(current_element.id == 0)
@@ -143,6 +180,41 @@ void *print_message_function(void *ptr)
 	}
 	
 }
+
+void *print_message_function2()
+{
+	double service_time;
+	
+	while((double) difftime(time(NULL),START) < 20.0  || isEmpty(list_elements)==0)
+	{	
+		if(element_in_queue(list_elements)<15){
+			break;
+			//aggiornare il valore attive del thread corrente
+		}
+		pthread_mutex_lock(&lock);
+		element current_element = pull(list_elements);
+		if(current_element.id == 0)
+		{
+			//printf("Coda vuota, sono il %s\n",message);
+			pthread_mutex_unlock(&lock);
+		}
+		else
+		{
+			printf("Ho preso l'elemento %d\n",current_element.id);
+			gettimeofday(&current_element.time_exit_queue,NULL);
+			float time_in_queue = calculate_dif_time(current_element.time_arrive,current_element.time_exit_queue);
+			printf("L'elemento %d è stato in coda %f\n",current_element.id,time_in_queue );
+			processati++;
+			service_time = Exponential(1.5);
+			Tot_service += service_time;
+			Tot_queue += time_in_queue;
+			pthread_mutex_unlock(&lock);
+			sleep(service_time);
+		}
+	}
+	
+}
+
 
 double Getarrival(double x)
 {

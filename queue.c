@@ -3,11 +3,12 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <sys/time.h>
 typedef struct
 {
 	int id;
-	clock_t time_arrive;
-	clock_t time_exit_queue;
+	struct timeval time_arrive;
+	struct timeval time_exit_queue;
 }element;
 
 
@@ -15,7 +16,7 @@ int k=1;
 
 int push(element *list_elements){
 	element p;
-	p.time_arrive=clock();
+	gettimeofday(&p.time_arrive,NULL);
 	p.id=k;
 	k++;
 	for(int i=0;i<50;i++){
@@ -26,6 +27,16 @@ int push(element *list_elements){
 	}
 	return 0;
 	
+}
+
+int element_in_queue(element *list_elements){
+	int n =0;	
+	for(int i=0;i<50;i++){
+		if(list_elements[i].id!=0){
+			n++;
+		}
+	}
+	return n;
 }
 
 int isEmpty(element *list_elements){
@@ -45,7 +56,7 @@ element pull(element *list_elements){
 		return p;
 	}
 	element current_element = list_elements[0];
-	current_element.time_exit_queue = clock();
+	gettimeofday(&current_element.time_exit_queue,NULL);
 	for(i=1;i<50;i++){
 		if(list_elements[i-1].id!=0){
 			list_elements[i-1].id=list_elements[i].id;
