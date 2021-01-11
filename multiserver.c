@@ -58,19 +58,24 @@ int main()
 	exit(0);
 }
 
-void *inserisci( void *ptr)
+void *inserisci( void *ptr) //thread #3
 {	
 	time_t difference_time;
 	double lambda = 1/1.0;
 	double time_next_arrival;
-	time_t start_time = time(NULL);
-	while((double) difftime(time(NULL),START) < 20.0){
-		difference_time = difftime(time(NULL),start_time);
-		if((double) difference_time < 5.0){
+	time_t start_time;
+
+	start_time = time(NULL);
+	while((double) difftime(time(NULL),START) < 20.0)
+	{
+		difference_time = difftime(time(NULL),start_time); 
+		if((double) difference_time < 5.0)
+		{
 			time_next_arrival = Getarrival(lambda);
 			printf("1/2     %f\n",time_next_arrival);
-
-		}else{
+		}
+		else
+		{
 			start_time = time(NULL);
 			time_next_arrival = Getarrival(1/1.0);
 			printf("1/8    %f\n",time_next_arrival);
@@ -83,20 +88,23 @@ void *inserisci( void *ptr)
 		sleep((double)time_next_arrival);
 		//printf("sono sveglio\n");
 	}
-
 }
 
-void *print_message_function( void *ptr )
+void *print_message_function(void *ptr)
 {
 	char *message;
 	message = (char *) ptr;
 	printf("%s \n", message);
-	while((double) difftime(time(NULL),START) < 20.0  || isEmpty(list_elements)==0){
+	while((double) difftime(time(NULL),START) < 20.0  || isEmpty(list_elements)==0)
+	{
 		pthread_mutex_lock(&lock);
 		element current_element = pull(list_elements);
-		if(current_element.id == 0){
+		if(current_element.id == 0)
+		{
 			printf("Coda vuota, sono il %s\n",message);
-		}else{
+		}
+		else
+		{
 			printf("Sono il %s e ho preso l'elemento %d\n", message,current_element.id);
 			current_element.time_exit_queue = clock();
 			printf("L'elemento %d è stato in coda %f\n",current_element.id,calculate_dif_time(current_element.time_arrive,current_element.time_exit_queue) );
@@ -111,13 +119,17 @@ void *print_message_function( void *ptr )
 	//printf("%d      vuota\n",isEmpty(list_elements));
 }
 
-double Getarrival(double x){
+double Getarrival(double x)
+{
 	SelectStream(1);
-	arrival = Exponential(x);
+	double pippo = Random();
+	arrival = Exponential(pippo);
+	printf("Pippo = %f\n\n", pippo);
 	return arrival;
 }
 
-float calculate_dif_time(clock_t t1, clock_t t2){
+float calculate_dif_time(clock_t t1, clock_t t2)
+{
 	float diff = ((float)(t2 - t1) / 1000000.0F ) * 1000;
 	return diff;
 }
