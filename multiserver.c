@@ -13,11 +13,12 @@
 #include<sys/time.h>
 #include<signal.h>
 
-void *print_message_function( void *ptr );
+#define DIM 250
+void *print_message_function();
 float calculate_dif_time(struct timeval time1,struct timeval time2);
-void *inserisci( void *ptr );
+void *inserisci();
 pthread_mutex_t lock;
-element list_elements[50];
+element list_elements[DIM];
 double Getarrival(double x);
 static double arrival = 0.0;
 void print_results( void);
@@ -51,20 +52,18 @@ void print_results()
 }
 int main()
 {
-	pthread_t thread1, thread2, thread3;
+	pthread_t thread1, thread2, thread3, thread4, thread5;
 
-	char *message1 = "Thread 1";
-	char *message2 = "Thread 2";
-	char *message3 = "Thread 3";
-	int  iret1, iret2, iret3;
 
-	initializate(list_elements);
+	initializate(list_elements,DIM);
 	signal(SIGINT,signal_handler);	
 	/* Create independent threads each of which will execute function */
 
-	iret1 = pthread_create( &thread1, NULL, print_message_function, (void*) message1);
-	iret2 = pthread_create( &thread2, NULL, print_message_function, (void*) message2);
-	iret3 = pthread_create( &thread3, NULL, inserisci, (void*) message3);
+	pthread_create( &thread1, NULL, print_message_function, NULL);
+	pthread_create( &thread2, NULL, print_message_function, NULL);
+	pthread_create( &thread4, NULL, print_message_function, NULL);
+	pthread_create( &thread5, NULL, print_message_function, NULL);
+	pthread_create( &thread3, NULL, inserisci, NULL);
 
 	/* Wait till threads are complete before main continues. Unless we  */
 	/* wait we run the risk of executing an exit which will terminate   */
@@ -80,14 +79,14 @@ int main()
 	exit(0);
 }
 
-void *inserisci( void *ptr) //thread #3
+void *inserisci() //thread #3
 {	
 	time_t difference_time;
-	double lambda = Random()*9;
+	double lambda = Random()*8;
 	double time_next_arrival;
 	time_t start_time;
 	start_time = time(NULL);
-	while((double) difftime(time(NULL),START) < 20.0)
+	while((double) difftime(time(NULL),START) < 60.0)
 	{
 		difference_time = difftime(time(NULL),start_time); 
 		if((double) difference_time < 5.0)
@@ -97,13 +96,14 @@ void *inserisci( void *ptr) //thread #3
 		}
 		else
 		{
-			lambda = Random()*9;
+			lambda = Random()*8;
 			start_time = time(NULL);
 			time_next_arrival = Getarrival(lambda);
 			printf("    %f\n",time_next_arrival);
 		}
+		printf("Sono qui\n");
 		pthread_mutex_lock(&lock);
-		push(list_elements);
+		push(list_elements,DIM);
 		printf("Ho inserito un elemento %d\n",inseriti+1);
 		pthread_mutex_unlock(&lock);
 		inseriti++;
@@ -112,24 +112,23 @@ void *inserisci( void *ptr) //thread #3
 	}
 }
 
-void *print_message_function(void *ptr)
+void *print_message_function()
 {
-	char *message;
-	message = (char *) ptr;
 	double service_time;
 	
-	while((double) difftime(time(NULL),START) < 20.0  || isEmpty(list_elements)==0)
-	{
-		pthread_mutex_lock(&lock);
-		element current_element = pull(list_elements);
-		if(current_element.id == 0)
-		{
-			printf("Coda vuota, sono il %s\n",message);
-			pthread_mutex_unlock(&lock);
+queue:	while((double) difftime(time(NULL),START) < 60.0  || isEmpty(list_elements)==0)
+	{	
+
+		
+		if(isEmpty(list_elements)!=0){
+			//printf("Coda vuota, sono il %s\n",message);
+			goto queue;
 		}
 		else
-		{
-			printf("Sono il %s e ho preso l'elemento %d\n", message,current_element.id);
+		{	
+			pthread_mutex_lock(&lock);
+			element current_element = pull(list_elements,DIM);
+			printf("Sono il Thread e ho preso l'elemento %d\n",current_element.id);
 			gettimeofday(&current_element.time_exit_queue,NULL);
 			float time_in_queue = calculate_dif_time(current_element.time_arrive,current_element.time_exit_queue);
 			printf("L'elemento %d è stato in coda %f\n",current_element.id,time_in_queue );

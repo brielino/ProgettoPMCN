@@ -14,12 +14,13 @@ typedef struct
 
 int k=1;
 
-int push(element *list_elements){
+int push(element *list_elements,int size){
 	element p;
 	gettimeofday(&p.time_arrive,NULL);
 	p.id=k;
 	k++;
-	for(int i=0;i<50;i++){
+	printf("%d array\n",size);
+	for(int i=0;i<size;i++){
 		if(list_elements[i].id==0){
 			list_elements[i]=p;
 			return 1;
@@ -29,9 +30,9 @@ int push(element *list_elements){
 	
 }
 
-int element_in_queue(element *list_elements){
+int element_in_queue(element *list_elements,int size){
 	int n =0;	
-	for(int i=0;i<50;i++){
+	for(int i=0;i<size;i++){
 		if(list_elements[i].id!=0){
 			n++;
 		}
@@ -47,7 +48,7 @@ int isEmpty(element *list_elements){
 }
 
 
-element pull(element *list_elements){
+element pull(element *list_elements,int size){
 	int i;
 	if(list_elements[0].id==0){
 		/*printf("WAIT!!! Queue full\n");*/
@@ -57,12 +58,12 @@ element pull(element *list_elements){
 	}
 	element current_element = list_elements[0];
 	gettimeofday(&current_element.time_exit_queue,NULL);
-	for(i=1;i<50;i++){
+	for(i=1;i<size;i++){
 		if(list_elements[i-1].id!=0){
 			list_elements[i-1].id=list_elements[i].id;
 			list_elements[i-1].time_arrive=list_elements[i].time_arrive;
 		}
-		if(i==50-1){
+		if(i==size-1){
 			element p;
 			p.id=0;
 			list_elements[i]=p;
@@ -71,8 +72,8 @@ element pull(element *list_elements){
 	return current_element;
 }
 
-void initializate(element *list_elements){
-	for(int i=0;i<50;i++){
+void initializate(element *list_elements,int size){
+	for(int i=0;i<size;i++){
 		element p;
 		p.id=0;
 		list_elements[i]=p;
@@ -80,8 +81,8 @@ void initializate(element *list_elements){
 	return;
 }
 
-void print_elements(element *list_elements){
-	for(int i=0;i<50;i++){
+void print_elements(element *list_elements,int size){
+	for(int i=0;i<size;i++){
 		printf("%d valore elemento\n",list_elements[i].id);
 	}
 }
