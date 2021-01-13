@@ -24,7 +24,7 @@ static double arrival = 0.0;
 void print_results( void);
 int inseriti=0;
 int processati=0;
-time_t START;
+struct timeval START;
 float Tot_queue = 0.0;
 float Tot_service = 0.0;
 
@@ -37,19 +37,21 @@ void signal_handler()
 
 /*Funzione che stampa tutti i risultati ottenuti*/
 void print_results()
-{
+{	struct timeval current_t;
+	gettimeofday(&current_t,NULL);
+	float time_simulation = calculate_dif_time(START,current_t);
 	printf("\n\n************************\n");
 	printf("FINE SIMULAZIONE - Dati:\n");
 	printf("************************\n");
 	printf("\n\nSono stati inseriti %d Job\n\n",inseriti);
 	printf("Sono stati processati %d Job\n\n",processati);
-	printf("Tempo trascorso dall'inizio della simulazione: %d\n\n",(int)difftime(time(NULL),START));
+	printf("Tempo trascorso dall'inizio della simulazione: %f\n\n",time_simulation);
 	float mean_queue = 0.0;
 	float mean_system = 0.0;
 	int euro = 10;
 	mean_queue = Tot_queue / processati;
 	mean_system = Tot_service / processati;
-	float Tot = ((int)difftime(time(NULL),START)*euro)*4;
+	float Tot = time_simulation*euro*4;
 	printf("Media tempo in coda dei Job = %f\n\n",mean_queue);
 	printf("Media tempo di servizio dei Job = %f\n\n",mean_system);
 	printf("NOTA: il Prezzo per tenere ogni secondo un server Up è = 10€.\n");
@@ -78,7 +80,7 @@ int main()
 	/* wait we run the risk of executing an exit which will terminate   */
 	/* the process and all threads before the threads have completed.   */
 	
-	START = time(NULL);
+	gettimeofday(&START,NULL);
 	
 	pthread_join( thread3, NULL);
 	pthread_join( thread1, NULL);
@@ -90,15 +92,19 @@ int main()
 /*Thread per inserimento dei Job, Thread3*/
 void *inserisci()
 {	
-	time_t difference_time;
+	float difference_time;
 	double lambda = Random()*8;
 	double time_next_arrival;
-	time_t start_time;
-	start_time = time(NULL);
-	while((double) difftime(time(NULL),START) < 60.0)
-	{
-		difference_time = difftime(time(NULL),start_time); 
-		if((double) difference_time < 5.0)
+	struct timeval start_time;
+	struct timeval internal_t;
+	struct timeval internal_t1;
+	gettimeofday(&internal_t1,NULL);
+	gettimeofday(&start_time,NULL);
+	while( calculate_dif_time(START,start_time) < 60.0)
+	{	
+		gettimeofday(&internal_t,NULL);
+		difference_time = calculate_dif_time(internal_t1,internal_t);	
+		if(difference_time < 5.0)
 		{
 			time_next_arrival = Getarrival(lambda);
 			printf("     %f\n",time_next_arrival);
@@ -106,9 +112,9 @@ void *inserisci()
 		else
 		{
 			lambda = Random()*8;
-			start_time = time(NULL);
+			internal_t1 = internal_t;
 			time_next_arrival = Getarrival(lambda);
-			printf("    %f\n",time_next_arrival);
+			printf("    RESET %f\n",time_next_arrival);
 		}
 		printf("Sono qui\n");
 		pthread_mutex_lock(&lock);
@@ -117,6 +123,7 @@ void *inserisci()
 		pthread_mutex_unlock(&lock);
 		inseriti++;
 		sleep((double)time_next_arrival);
+		gettimeofday(&start_time,NULL);
 		//printf("sono sveglio\n");
 	}
 }
@@ -124,14 +131,15 @@ void *inserisci()
 /*Thread STATICI*/
 void *print_message_function()
 {
-	double service_time;
-	
-queue:	while((double) difftime(time(NULL),START) < 60.0  || isEmpty(list_elements)==0)
+	float service_time;
+	struct timeval start_time;
+	gettimeofday(&start_time,NULL);
+queue:	while(calculate_dif_time(START,start_time) < 60.0  || isEmpty(list_elements)==0)
 	{	
 
-		
 		if(isEmpty(list_elements)!=0){
 			//printf("Coda vuota, sono il %s\n",message);
+			gettimeofday(&start_time,NULL);
 			goto queue;
 		}
 		else
