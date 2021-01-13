@@ -29,27 +29,36 @@ float Tot_queue = 0.0;
 float Tot_service = 0.0;
 
 
-
+/*Funzione chiamata quando si tenta di uscire dal programma premendo CTRL+C*/
 void signal_handler()
 {
 	print_results();
 }
 
+/*Funzione che stampa tutti i risultati ottenuti*/
 void print_results()
 {
+	printf("\n\n************************\n");
+	printf("FINE SIMULAZIONE - Dati:\n");
+	printf("************************\n");
 	printf("\n\nSono stati inseriti %d Job\n\n",inseriti);
 	printf("Sono stati processati %d Job\n\n",processati);
 	printf("Tempo trascorso dall'inizio della simulazione: %d\n\n",(int)difftime(time(NULL),START));
 	float mean_queue = 0.0;
 	float mean_system = 0.0;
+	int euro = 10;
 	mean_queue = Tot_queue / processati;
 	mean_system = Tot_service / processati;
-	printf("Media tempo in coda dei Job = %f\n",mean_queue);
-	printf("Media tempo di servizio dei Job = %f\n",mean_system);
-
+	float Tot = ((int)difftime(time(NULL),START)*euro)*4;
+	printf("Media tempo in coda dei Job = %f\n\n",mean_queue);
+	printf("Media tempo di servizio dei Job = %f\n\n",mean_system);
+	printf("NOTA: il Prezzo per tenere ogni secondo un server Up è = 10€.\n");
+	printf("TOTALE SPESO = %f€.\n", Tot);
 	exit(1);
 
 }
+
+/*Funzione princilale*/
 int main()
 {
 	pthread_t thread1, thread2, thread3, thread4, thread5;
@@ -78,8 +87,8 @@ int main()
 	print_results();
 	exit(0);
 }
-
-void *inserisci() //thread #3
+/*Thread per inserimento dei Job, Thread3*/
+void *inserisci()
 {	
 	time_t difference_time;
 	double lambda = Random()*8;
@@ -112,6 +121,7 @@ void *inserisci() //thread #3
 	}
 }
 
+/*Thread STATICI*/
 void *print_message_function()
 {
 	double service_time;

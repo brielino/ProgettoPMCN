@@ -12,8 +12,15 @@
 #include<stdbool.h>
 #include<sys/time.h>
 #include<signal.h>
+#include<time.h>
 
 #define DIM 250
+
+double Time1 = 0;
+double Time2 = 0;
+int T_id1 = 0;
+int T_id2 = 0;
+
 typedef struct
 {
 	pthread_t id;
@@ -27,6 +34,9 @@ void *print_message_function2();
 float calculate_dif_time(struct timeval time1,struct timeval time2);
 void *inserisci();
 pthread_mutex_t lock;
+
+pthread_mutex_t lock2;
+
 element list_elements[DIM];
 double Getarrival(double x);
 static double arrival = 0.0;
@@ -39,13 +49,20 @@ float Tot_service = 0.0;
 
 dinamic_threads list_threads[3];
 pthread_t thread4, thread5, thread6;
+
+/*Funzione chiamata quando si tenta di uscire dal programma premendo CTRL+C*/
 void signal_handler()
 {
 	print_results();
 }
 
+/*Funzione che stampa tutti i risultati ottenuti*/
 void print_results()
 {
+	printf("\n\n************************\n");
+	printf("FINE SIMULAZIONE - Dati:\n");
+	printf("************************\n");
+
 	printf("\n\nSono stati inseriti %d Job\n\n",inseriti);
 	printf("Sono stati processati %d Job\n\n",processati);
 	printf("Tempo trascorso dall'inizio della simulazione: %d\n\n",(int)difftime(time(NULL),START));
@@ -53,13 +70,30 @@ void print_results()
 	float mean_system = 0.0;
 	mean_queue = Tot_queue / processati;
 	mean_system = Tot_service / processati;
-	printf("Media tempo in coda dei Job = %f\n",mean_queue);
-	printf("Media tempo di servizio dei Job = %f\n",mean_system);
+	printf("Media tempo in coda dei Job = %f\n\n",mean_queue);
+	printf("Media tempo di servizio dei Job = %f\n\n",mean_system);
 
+	double mean_time2 = 0;
+
+	mean_time2 = Time2 / T_id2;
+
+	printf("Tempo di servizio thread1 = %f\n\n",Time1);
+	printf("Media tempo di servizio del DINAMICO = %f\n\n",mean_time2);
+
+	int euro = 10;
+	float Totale = Time1*euro;
+	float Totale2 = (euro*mean_time2)*T_id2;
+	float Tot = Totale + Totale2; 
+
+	printf("Server dinamici attivati = %d\n\n", T_id2);
+	printf("NOTA: il Prezzo per tenere ogni secondo un server DINAMICO Up è = 10€.\n");
+	printf("Di conseguenza abbiamo speso circa %f€ in Server Dinamici\n", Totale2);
+	printf("\nAbbiamo speso per thread1 %f€\n\n", Totale);
+	printf("TOTALE SPESO = %f€\n", Tot);
 	exit(1);
 }
 
-
+/*Funzione per creazione dinamica dei nuovi threads*/
 void *dinamic_create()
 {
 	while((double) difftime(time(NULL),START) < 30.0)
@@ -88,7 +122,8 @@ void start_t(){
 	list_threads[2].attive= 0;
 }
 
-int main()
+/*Funzione princilale*/
+int main() 
 {
 	pthread_t thread1, thread2, thread3;
 	
@@ -116,7 +151,8 @@ int main()
 	exit(0);
 }
 
-void *inserisci() //thread #3
+/*Thread per inserimento dei Job, Thread 3*/
+void *inserisci()
 {	
 	time_t difference_time;
 	double lambda = Random()*8;
@@ -148,9 +184,14 @@ void *inserisci() //thread #3
 	}
 }
 
+/*Thread STATICO*/
 void *print_message_function()
 {
+	time_t start1, end1;
 	double service_time;
+	double tempo1 = 0;
+	time(&start1);
+
 queue:	while((double) difftime(time(NULL),START) < 60.0  || isEmpty(list_elements)==0)
 	{	
 		
@@ -173,12 +214,24 @@ queue:	while((double) difftime(time(NULL),START) < 60.0  || isEmpty(list_element
 			sleep(service_time);
 		}
 	}
+	time(&end1);
+	tempo1 = difftime(end1, start1);
+	printf("\n\n TEMPO %f\n\n", tempo1);
+	
+	pthread_mutex_lock(&lock2); 
+	Time1 += tempo1;
+	pthread_mutex_unlock(&lock2);
 	
 }
 
+/*Threads DINAMICI*/
 void *print_message_function2()
 {
 	double service_time;
+	time_t start2, end2;
+	double tempo2 = 0;
+	time(&start2);
+
 	pthread_t current_thread = pthread_self();
 	while((double) difftime(time(NULL),START) < 60.0  || isEmpty(list_elements)==0)
 	{	
@@ -214,12 +267,19 @@ void *print_message_function2()
 				}
 			}
 		}
-		
 	}
-	off: printf("sono uscito porca di quella puttana %ld\n",current_thread);	
+	off: printf("sono uscito porca di quella puttana %ld\n",current_thread);
+	time(&end2);
+	tempo2 = difftime(end2, start2);
+	printf("\n\n TEMPO2 %f\n\n", tempo2);
+	
+	pthread_mutex_lock(&lock2); 
+	Time2 += tempo2;
+	T_id2++;
+	pthread_mutex_unlock(&lock2);	
 }
 
-
+/*Funzione per calcolare il Tasso di Arrivo*/
 double Getarrival(double x)
 {
 	SelectStream(1);
