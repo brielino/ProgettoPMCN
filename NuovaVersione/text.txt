@@ -1,0 +1,11 @@
+0 elementi in coda alla fine prima di smaltirla
+
+
+************************
+FINE SIMULAZIONE - Dati:
+************************
+Media tempo in coda dei Job = 1.149405
+
+0 elementi in coda alla fine
+Il numero di elementi massimo in coda è: 2
+Tempo fine simulazione 10800.040944
