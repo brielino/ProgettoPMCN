@@ -46,7 +46,7 @@ int main(){
 	
 	inizialize();
 	while(next_arrive < START){
-		Getarrival(1/49.0);//Passo al prossimo Job
+		Getarrival(lambda);//Passo al prossimo Job
 		n_arrive++;
 		int serv = 0; //indica se il job è stato servito o meno, 0 no 1 si
 		for(int i=0;i<N_SERVER;i++){
@@ -106,7 +106,7 @@ void check(){
 		max_in_queue = n_queue;
 	}
 	for(int i=0;i<DIM;i++){
-			if(element_queue[i] <= next_arrive && n_queue !=0){
+			if(element_queue[i] <= next_arrive && n_queue !=0 && element_queue[i] != 0.0){
 				n_queue--;
 				element_queue[i] = 0.0;	
 			}
