@@ -89,22 +89,22 @@ int main(){
 		}else{
 			goto no_dinamic;
 		}
-		for(int i=0;i< (MAX_SERVER - START_SERVER);i++){
-			if(busy_dinamic[i] != 2){
+		for(int j=0;j< (MAX_SERVER - START_SERVER);j++){
+			if(busy_dinamic[j] != 2){
 				//Controllo per settare a liberi i server che con il nuovo arrivo si sono liberati
-				if(busy_dinamic[i] == 1 && (dinamic_server[i][0] + dinamic_server[i][1]) < next_arrive){	
-					busy_dinamic[i] = 0;
+				if(busy_dinamic[j] == 1 && (dinamic_server[j][0] + dinamic_server[j][1]) < next_arrive){	
+					busy_dinamic[j] = 0;
 					if(serv == 0 ){//Per evitare di assegnare uno stesso Job 
-						busy_dinamic[i] = 1;
-						dinamic_server[i][0] = next_arrive;
-						dinamic_server[i][1] = Getservice(u);
+						busy_dinamic[j] = 1;
+						dinamic_server[j][0] = next_arrive;
+						dinamic_server[j][1] = Getservice(u);
 						serv = 1;
 					}			
-				}else if(busy_dinamic[i] == 0){//Per prendere in considerazione i Server liberi
+				}else if(busy_dinamic[j] == 0){//Per prendere in considerazione i Server liberi
 					if(serv == 0 ){
-						busy_dinamic[i] = 1;
-						dinamic_server[i][0] = next_arrive;
-						dinamic_server[i][1] = Getservice(u);
+						busy_dinamic[j] = 1;
+						dinamic_server[j][0] = next_arrive;
+						dinamic_server[j][1] = Getservice(u);
 						serv = 1;
 					}	
 				}
@@ -190,7 +190,7 @@ void verify(){
 				printf("%f è quando ha preso il job\n",server[i][0]);
 				printf("%f è quando si libererà\n",server[i][1]+server[i][0]);
 				printf("%d elementi in coda\n\n\n",n_queue);
-				sleep(5);	
+		
 			}
 		}
 		for(int i=0;i< (MAX_SERVER - START_SERVER);i++){
@@ -200,7 +200,7 @@ void verify(){
 				printf("%f è quando ha preso il job\n",dinamic_server[i][0]);
 				printf("%f è quando si libererà\n",dinamic_server[i][1]+dinamic_server[i][0]);
 				printf("%d elementi in coda\n\n\n",n_queue);
-				sleep(5);	
+	
 			}
 		}
 	}
