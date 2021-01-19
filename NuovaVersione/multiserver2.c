@@ -11,7 +11,6 @@
 #define START 10800
 #define DIM 5000
 #define N_SERVER 10
-#define STATIC_SERVER 4
 #define LIM_MAX_QUEUE 10
 #define LIM_MIN_QUEUE 5
 
@@ -27,7 +26,7 @@ void insert_in_queue(double time_arrive);
 void free_server();
 //DICHIARAZIONE DI VARIABILI
 int busy[N_SERVER];//Array per verificare se i server sono occupari (0/liberi - 1/occupato - 2/ non attivo)
-double server[N_SERVER][3];//Array dei tempi di arrivo e servizio dei singoli server
+double server[N_SERVER][2];//Array dei tempi di arrivo e servizio dei singoli server
 double time_in_queue = 0.0;
 double time_in_service = 0.0;
 int n_queue = 0; //# elementi in coda
@@ -44,18 +43,9 @@ int ciclo_w; //Per definire quante volte entra nel while (prove-su-prove)
 void inizialize()
 {
 	for(int i=0;i<N_SERVER;i++){
-        	if(i < STATIC_SERVER){ //Numero server statici (4)
-		    	busy[i] = 0;
-		    	server[i][0]= 0.0;
-		    	server[i][1]= 0.0;
-				server[i][2]= 0.0;	
-       	 	}
-        	else{ 
-            	busy[i] = 2;
-		    	server[i][0]= 0.0;
-		    	server[i][1]= 0.0;
-				server[i][2]= 0.0; 
-        	}    
+	    busy[i] = 0;
+		server[i][0]= 0.0;
+	  	server[i][1]= 0.0;   
    	}
 	for(int i=0;i<DIM;i++){
 		element_queue[i] = 0.0;
@@ -67,7 +57,6 @@ int main(){
 	inizialize();
 	while(next_arrive < START){
 		Getarrival(lambda);//Passo al prossimo Job      		
-		up_down(); //Controllo per istanziare nuovi Server
 		free_server();//Libero i Server. 
 		int s = 0;//numero server liberi
 		for(int i=0;i<N_SERVER;i++){
@@ -76,14 +65,14 @@ int main(){
 			}
 		}		
 		int in_while = 0;
-		bool not_insert_again = true;		
-		int s_before = s;
+		bool not_insert_again = true;
+        int s_before = s;		
 		while(s > 0){
 			ciclo_w += 1;
 			in_while = 1;
-			if(s_before != s && n_queue == 0){
+          	if(s_before != s && n_queue == 0){
 				break;
-			}			
+			}				
 			for(int i=0;i<N_SERVER;i++){
 				if(n_queue == 0){
 					if(busy[i] == 0){
@@ -162,6 +151,7 @@ int main(){
 						break;
 					}
 				}
+			
 			}
 		}
 		if(in_while==0){
@@ -171,23 +161,21 @@ int main(){
 		}		
 	exit_while:	verify();
     }
-	printf("%d elementi in coda alla fine prima di smaltirla\n",n_queue);
+    printf("%d elementi in coda alla fine prima di smaltirla\n",n_queue);
 	while(n_queue != 0){
 		Getarrival(1/2.0);
-		up_down();
 		n_arrive--;	
 		free_server();
 		double element = pull();			
 		double min_time= 99999.0;
-		int current_s = -1;	
-
+		int current_s = -1;
 		for(int i=0;i<N_SERVER;i++){
 			if((server[i][0] + server[i][1]) - element < min_time && busy[i] == 0){
 				min_time = (server[i][0] + server[i][1]) - element;
 				current_s = i;
 			}
 		}
-		if(min_time <0 ){
+		if(min_time <0){
 			server[current_s][0] = element;
 			server[current_s][1] = Getservice(u, current_s);
 			busy[current_s] = 1;			
@@ -199,7 +187,6 @@ int main(){
 			busy[current_s] = 1;			
 		}
 	}
-	printf("NO-WHILE");	
 	double final_time = 0.0;
     	for(int u=0; u<N_SERVER; u++){
         	if((server[u][0] + server[u][1]) > final_time){
@@ -210,7 +197,6 @@ int main(){
 	print_results();
 	printf("%d elementi in coda alla fine\n",n_queue);
 	printf("Il numero di elementi massimo in coda è: %d\n",max_in_queue);
-	printf("Tempo fine simulazione %f\n",next_arrive);
 	return 0;
 }
 
@@ -234,8 +220,7 @@ void print_results()
 	printf("Media tempo in coda dei Job = %f\n\n",mean_queue);
 	printf("INSERITI : %d\n", n_arrive);
 	printf("PROCESSATI : %d\n", processati);
-	printf("Tempo di servizio TOTALE = %f\n", time_in_service + 4*next_arrive);
-	printf("Tempo di servizio DINAMICO = %f\n", time_in_service);	
+    printf("Tempo di servizio = %f\n", next_arrive*10);	
 }
 
 void verify(){
@@ -248,9 +233,9 @@ void verify(){
 				printf("%f è quando ha preso il job\n",server[i][0]);
 				printf("%f è quando si libererà\n",server[i][1]+server[i][0]);
 				printf("%d elementi in coda\n",n_queue);
-                	for(int i=0;i<N_SERVER;i++){
-                   		printf("busy[%d] = %d\n\n", i, busy[i]);
-                	}	
+                		for(int i=0;i<N_SERVER;i++){
+                    			printf("busy[%d] = %d\n\n", i, busy[i]);
+                		}	
 			}
 		}
 	}
@@ -277,7 +262,7 @@ void insert_in_queue(double time_arrive){
             break;
 		}
 	}
-	n_queue++;
+	n_queue+=1;
 	if(n_queue > max_in_queue){
 		max_in_queue = n_queue;
 	}
@@ -293,30 +278,7 @@ double pull(){
 			element_queue[i] = 0.0;
 		}
 	}
-	n_queue--; //se scriviamo n_queue-1 dice l'espressione risulta non usata 
-	processati++;
+	n_queue--;
+    processati++; 
 	return elem;
-}
-	
-void up_down()
-{
-	if(n_queue > LIM_MAX_QUEUE ){
-		for(int i=STATIC_SERVER;i < N_SERVER;i++){
-			if(busy[i] == 2){
-				busy[i] = 0;
-				server[i][0] = next_arrive;
-				server[i][2] = next_arrive; 
-				break;
-			}
-		}
-	}
-	else if(n_queue < LIM_MIN_QUEUE ){ 
-		for(int j=STATIC_SERVER;j < N_SERVER;j++){
-			if(busy[j] == 0){
-				busy[j] = 2;
-				server[j][1] = 0.0;
-				time_in_service += next_arrive - server[j][2]; 
-			}
-		}		
-	}
 }
