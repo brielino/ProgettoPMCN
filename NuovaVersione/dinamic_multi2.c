@@ -91,8 +91,6 @@ int main(){
 						server[i][0] = next_arrive;
 						server[i][1] = Getservice(u, i);
 						
-						double T = server[i][0] + server[i][1]; 
-						
 						processati++;
 						s--;
 						/*printf("\nnext_arrive = %f\n", next_arrive);

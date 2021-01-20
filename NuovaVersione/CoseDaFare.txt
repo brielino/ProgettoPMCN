@@ -1,0 +1,6 @@
+-Prendere tutte le variabili per il calcolo delle statistiche / prenderlo per multi e dinamic
+-Fare grafico dei seed
+-Metodo banch con calcolo intervallo di confidenza
+-confronto valori teorici con quelli ottenuti
+-Relazione ( Sviluppi futuri )
+-Presentazione

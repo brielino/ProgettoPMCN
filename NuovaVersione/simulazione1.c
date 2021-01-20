@@ -28,14 +28,14 @@ void free_server();
 int busy[N_SERVER];//Array per verificare se i server sono occupari (0/liberi - 1/occupato - 2/ non attivo)
 double server[N_SERVER][2];//Array dei tempi di arrivo e servizio dei singoli server
 double time_in_queue = 0.0;
-double time_in_service = 0.0;
+double response_time = 0.0; //Tempo medio di risposta
 int n_queue = 0; //# elementi in coda
 double next_arrive = 0.0;
 int n_arrive = 0; //# elementi inseriti
 int max_in_queue=0;
 double element_queue[DIM]; //Coda
 double u = 1/5.0;
-double lambda = 1/49.0;
+double lambda = 1/20.0;
 int processati = 0;
 
 int ciclo_w; //Per definire quante volte entra nel while (prove-su-prove)
@@ -54,9 +54,9 @@ void inizialize()
 
 int main(){
 	
-	PlantSeeds(123456789);
 	inizialize();
 	while(next_arrive < START){
+
 		Getarrival(lambda);//Passo al prossimo Job      		
 		free_server();//Libero i Server. 
 		int s = 0;//numero server liberi
@@ -67,11 +67,11 @@ int main(){
 		}		
 		int in_while = 0;
 		bool not_insert_again = true;
-        	int s_before = s;		
+        int s_before = s;		
 		while(s > 0){
 			ciclo_w += 1;
 			in_while = 1;
-          		if(s_before != s && n_queue == 0){
+          	if(s_before != s && n_queue == 0){
 				break;
 			}				
 			for(int i=0;i<N_SERVER;i++){
@@ -80,13 +80,12 @@ int main(){
 						busy[i] = 1;
 						server[i][0] = next_arrive;
 						server[i][1] = Getservice(u, i);
+						
 						processati++;
+                        if(processati%10 == 0){
+                            printf("%d Processati; %f Tempo medio di risposta;\n", processati, (response_time + time_in_queue)/processati);
+                        }
 						s--;
-						/*printf("\nnext_arrive = %f\n", next_arrive);
-						printf("CODA VUOTA, SERVER LIBERI - ARRIVO NUMERO %d\n", n_arrive);
-						printf("Server%d = %d\n", i, busy[i]);	//Per verificare lo stato dei server
-						printf("Tempo in cui si libererà il Server = %f\n\n", T);
-						//sleep(2);*/
 						goto exit_while;					
 					}
 				}
@@ -96,20 +95,7 @@ int main(){
 						insert_in_queue(next_arrive);
 						not_insert_again = false;
 					}			
-					/******************************************
-					printf("\n\n\nARRIVO NUMERO %d, valore = %f\n", n_arrive,  next_arrive);
-					printf("Elementi in coda:\n");
-					for(int q=0;q<DIM;q++){
-						if(element_queue[q] != 0.0)
-						printf(" %f\n", element_queue[q]);
-					}
-					printf("#elementi in coda = %d\n", n_queue);
-					printf("Elemento appena estratto dalla coda = %f\n", element);
 
-					for(int z=0; z<N_SERVER; z++){
-						printf("Server%d = %d\n", z, busy[z]);	//Per verificare lo stato dei server
-					}
-					******************************************/
 
 					double min_time= 99999.0;
 					int current_s;
@@ -118,12 +104,7 @@ int main(){
 							min_time = (server[i][0] + server[i][1]) - element;
 							current_s = i;
 							if(min_time <0){	
-								/*printf("ERRORE\n");
-								printf("i = %d\n", i);
-								printf("meantime = %f\n", min_time);
-								printf(" %f\n", element);
-								printf("%d\n", n_arrive);								
-								return 0;*/
+
 							}
 						}
 					}
@@ -132,9 +113,9 @@ int main(){
 						server[current_s][1] = Getservice(u, current_s);
 						s--;
 						busy[current_s] = 1;
-						/*printf(" min_time<0 - PRESO DA server%d\n", current_s);
-						printf("Aggiornamento stato: Server%d=%d\n", current_s, busy[current_s]);
-						//sleep(3);*/
+                        if(processati%10 == 0){
+                            printf("%d Processati; %f Tempo medio di risposta;\n", processati, (response_time + time_in_queue)/processati);
+                        }
 						break;
 					}
 					else{
@@ -143,9 +124,9 @@ int main(){
 						server[current_s][1] = Getservice(u, current_s);
 						s--;
 						busy[current_s] = 1;
-						/*printf("PRESO DA server%d\n", current_s);
-						printf("Aggiornamento stato: Server%d=%d\n", current_s, busy[current_s]);
-						//sleep(3);*/
+                        if(processati%10 == 0){
+                            printf("%d Processati; %f Tempo medio di risposta;\n", processati, (response_time + time_in_queue)/processati);
+                        }
 						break;
 					}
 				}
@@ -157,9 +138,9 @@ int main(){
 			//printf("\n\nSERVER PIENI - ARRIVO NUMERO %d, valore = %f\n", n_arrive, next_arrive);	
 			//sleep(2);
 		}		
-exit_while:	verify();
-        }
-	printf("%d elementi in coda alla fine prima di smaltirla\n",n_queue);
+	exit_while:	verify();
+    }
+
 	while(n_queue != 0){
 		Getarrival(1/2.0);
 		n_arrive--;	
@@ -186,15 +167,14 @@ exit_while:	verify();
 		}
 	}
 	double final_time = 0.0;
-	for(int u=0; u<N_SERVER; u++){
-		if((server[u][0] + server[u][1]) > final_time){
-	    		final_time = server[u][0] + server[u][1]; 
-		}
+    	for(int u=0; u<N_SERVER; u++){
+        	if((server[u][0] + server[u][1]) > final_time){
+            		final_time = server[u][0] + server[u][1]; 
+        	}
 	}
-	next_arrive = final_time;
-	print_results();
-	printf("%d elementi in coda alla fine\n",n_queue);
-	printf("Il numero di elementi massimo in coda è: %d\n",max_in_queue);
+   	next_arrive = final_time;
+	//print_results();
+
 	return 0;
 }
 
@@ -218,7 +198,7 @@ void print_results()
 	printf("Media tempo in coda dei Job = %f\n\n",mean_queue);
 	printf("INSERITI : %d\n", n_arrive);
 	printf("PROCESSATI : %d\n", processati);
-        printf("Tempo di servizio = %f\n", next_arrive*10);	
+    printf("Tempo di servizio = %f\n", next_arrive*10);	
 }
 
 void verify(){
@@ -242,7 +222,8 @@ void verify(){
 double Getservice(double x, int server)
 {
 	SelectStream(1+server);
-        double service_time = Exponential(x);
+    double service_time = Exponential(x);
+    response_time += service_time; 
 	return service_time;
 }
 
@@ -257,7 +238,7 @@ void insert_in_queue(double time_arrive){
 	for(int i=0;i<DIM;i++){
 		if(element_queue[i] == 0.0){
 			element_queue[i] = time_arrive;
-            		break;
+            break;
 		}
 	}
 	n_queue+=1;
@@ -277,6 +258,6 @@ double pull(){
 		}
 	}
 	n_queue--;
-        processati++; 
+    processati++; 
 	return elem;
 }
