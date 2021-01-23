@@ -35,7 +35,7 @@ int n_arrive = 0; //# elementi inseriti
 int max_in_queue=0;
 double element_queue[DIM]; //Coda
 double u = 1/5.0;
-double lambda = 1/20.0;
+double lambda = 1/30.0;
 int processati = 0;
 
 int ciclo_w; //Per definire quante volte entra nel while (prove-su-prove)
@@ -53,7 +53,11 @@ void inizialize()
 }
 
 int main(){
-	
+	//PlantSeeds(12345);
+	//PlantSeeds(54321);
+	//PlantSeeds(155066);
+	//PlantSeeds(3131313);
+	PlantSeeds(123456789);
 	inizialize();
 	while(next_arrive < START){
 
@@ -67,11 +71,11 @@ int main(){
 		}		
 		int in_while = 0;
 		bool not_insert_again = true;
-        int s_before = s;		
+        	int s_before = s;		
 		while(s > 0){
 			ciclo_w += 1;
 			in_while = 1;
-          	if(s_before != s && n_queue == 0){
+          		if(s_before != s && n_queue == 0){
 				break;
 			}				
 			for(int i=0;i<N_SERVER;i++){
@@ -82,9 +86,9 @@ int main(){
 						server[i][1] = Getservice(u, i);
 						
 						processati++;
-                        if(processati%10 == 0){
-                            printf("%d Processati; %f Tempo medio di risposta;\n", processati, (response_time + time_in_queue)/processati);
-                        }
+                        			if(processati%500 == 0){
+                            				printf("%d ; %f \n", (int) next_arrive , (time_in_queue)/processati);
+                        			}
 						s--;
 						goto exit_while;					
 					}
@@ -113,9 +117,9 @@ int main(){
 						server[current_s][1] = Getservice(u, current_s);
 						s--;
 						busy[current_s] = 1;
-                        if(processati%10 == 0){
-                            printf("%d Processati; %f Tempo medio di risposta;\n", processati, (response_time + time_in_queue)/processati);
-                        }
+                        			if(processati%500 == 0){
+                            				printf("%d ; %f \n", (int) next_arrive, (time_in_queue)/processati);
+                       				}
 						break;
 					}
 					else{
@@ -124,9 +128,9 @@ int main(){
 						server[current_s][1] = Getservice(u, current_s);
 						s--;
 						busy[current_s] = 1;
-                        if(processati%10 == 0){
-                            printf("%d Processati; %f Tempo medio di risposta;\n", processati, (response_time + time_in_queue)/processati);
-                        }
+                        			if(processati%500 == 0){
+                            				printf("%d ; %f \n", (int) next_arrive, (time_in_queue)/processati);
+                        			}
 						break;
 					}
 				}
@@ -135,12 +139,9 @@ int main(){
 		}
 		if(in_while==0){
 			insert_in_queue(next_arrive);
-			//printf("\n\nSERVER PIENI - ARRIVO NUMERO %d, valore = %f\n", n_arrive, next_arrive);	
-			//sleep(2);
 		}		
-	exit_while:	verify();
-    }
-
+exit_while:	verify();
+    	}
 	while(n_queue != 0){
 		Getarrival(1/2.0);
 		n_arrive--;	
@@ -222,8 +223,8 @@ void verify(){
 double Getservice(double x, int server)
 {
 	SelectStream(1+server);
-    double service_time = Exponential(x);
-    response_time += service_time; 
+    	double service_time = Exponential(x);
+    	response_time += service_time; 
 	return service_time;
 }
 
@@ -238,7 +239,7 @@ void insert_in_queue(double time_arrive){
 	for(int i=0;i<DIM;i++){
 		if(element_queue[i] == 0.0){
 			element_queue[i] = time_arrive;
-            break;
+            		break;
 		}
 	}
 	n_queue+=1;
@@ -258,6 +259,6 @@ double pull(){
 		}
 	}
 	n_queue--;
-    processati++; 
+    	processati++; 
 	return elem;
 }
