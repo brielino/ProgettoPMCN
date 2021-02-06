@@ -9,7 +9,7 @@
 #include<stdio.h>
 #include<stdbool.h>
 
-#define START 10800
+#define START 21600
 #define DIM 5000
 #define N_SERVER 10
 #define LIM_MAX_QUEUE 13

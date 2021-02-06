@@ -12,10 +12,13 @@ double calculate_deviation(double *array,int batch){
     	double sum_2= 0.0;
     	for(int i = 0; i <batch; i++){
         	sum+=array[i];
-        	sum_2 = sum_2 +(array[i])*(array[i]);
 	}
 	sum = sum/batch;
-	return (sum_2-((batch*sum*sum)/batch))/(batch-1);
+	double dev = 0.0;
+	for(int j = 0; j < batch; j++){
+		dev = dev + (array[j] - sum)*(array[j] - sum);
+	}
+	return sqrt(dev/(batch-1));
 
 }
 
@@ -24,7 +27,7 @@ double calculate_mean(double *array,int batch){
     	for(int i = 0; i <batch; i++){
         	mean+=array[i];
 	}
-	return mean/batch;
+	return (double)mean/(double)batch;
 
 }
 

@@ -1,0 +1,4 @@
+1.984217 t 0.013560 deviazione 9.949874 radice
+0.148301 -/+ 0.002704 ---> Intervallo di Confidenza ( 0.151005 , 0.145597 )
+1.984217 t 0.016616 deviazione 9.949874 radice
+0.347113 -/+ 0.003314 ---> Intervallo di Confidenza ( 0.350427 , 0.343800 )
