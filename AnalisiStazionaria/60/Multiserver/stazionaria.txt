@@ -1,0 +1,21 @@
+0 elementi in coda alla fine prima di smaltirla
+
+
+************************
+FINE SIMULAZIONE - Dati:
+************************
+Media tempo in coda dei Job = 0.005012
+
+Media tempo di servizio = 0.204965
+INSERITI : 649493
+PROCESSATI : 649493
+Tempo di servizio = 216007.308344
+N Batch calcolati = 64
+0 elementi in coda alla fine
+Il numero di elementi massimo in coda è: 23
+Tempo di servizio medio Batch
+1.998341 t 0.002545 deviazione 7.937254 radice
+0.204922 -/+ 0.000641 ---> Intervallo di Confidenza ( 0.205563 , 0.204281 )
+Tempo di attesa medio in coda Batch
+1.998341 t 0.000978 deviazione 7.937254 radice
+0.004990 -/+ 0.000246 ---> Intervallo di Confidenza ( 0.005237 , 0.004744 )
